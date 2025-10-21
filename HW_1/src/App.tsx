@@ -33,27 +33,29 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col flex-nowrap items-center">
-      <div className="controls flex flex-row flex-wrap m-3">
-        <button className="FilterMode mr-5" onClick={() => setFilterMode('all')} disabled={filterMode === 'all'}>
-          Все
-        </button>
-        <button className="FilterMode mr-5" onClick={() => setFilterMode('favorites')} disabled={filterMode === 'favorites'}>
-          Избранное
-        </button>
-        <input
-          type="text"
-          placeholder="Начните вводить..."
-          ref={searchInputRef}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+      <div className="container max-w-200">
+        <div className="controls flex flex-row flex-wrap justify-center m-3">
+          <button className="FilterMode mr-5" onClick={() => setFilterMode('all')} disabled={filterMode === 'all'}>
+            Все
+          </button>
+          <button className="FilterMode mr-5" onClick={() => setFilterMode('favorites')} disabled={filterMode === 'favorites'}>
+            Избранное
+          </button>
+          <input
+            type="text"
+            placeholder="Начните вводить..."
+            ref={searchInputRef}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-      <div className='flex flex-row flex-wrap'>
-        {visibleMovies.length != 0 ? visibleMovies.map(movie => (
-        <MovieCard movie={movie} key={movie.id} onToggleFavorite={handleToggleFavorite} ></MovieCard>
-      )) : <div>Фильмов нет</div>}
-    </div>
+        <div className='CardsContainer grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center'>
+          {visibleMovies.length != 0 ? visibleMovies.map(movie => (
+          <MovieCard movie={movie} key={movie.id} onToggleFavorite={handleToggleFavorite} ></MovieCard>
+        )) : <div>Фильмов нет</div>}
+        </div>
+      </div>
     </div>
   );
 };
