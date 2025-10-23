@@ -3,7 +3,7 @@ import React from "react";
 
 interface MovieCardProps {
 	movie: IMovie;
-	onToggleFavorite: (id: number) => void;
+	onToggleFavorite: (id: string) => void;
 	viewMode: 'grid' | 'list';
 }
 
