@@ -1,13 +1,16 @@
-import React, {useRef, useState} from "react";
-import {type IMovie} from "./data/movies.ts";
-import {MovieCard} from "./components/MovieCard/MovieCard.tsx";
+import React, { useState } from 'react';
+import {type IMovie, type TOmdbResponse} from './data/movies.ts';
+import {SearchBar} from './components/SearchBar.tsx';
+import {Controls} from './components/Controls.tsx';
+import {MovieList} from './components/MovieList.tsx';
 
-type FilterMode = 'all' | 'favorites';
-type ViewMode = 'grid' | 'list';
+export type FilterMode = 'all' | 'favorites';
+export type ViewMode = 'grid' | 'list';
 
 const App: React.FC = () => {
+  const [searchResults, setSearchResults] = useState<IMovie[]>([]);
+  const [favorites, setFavorites] = useState<Map<string, IMovie>>(new Map());
 
-  const [movies, setMovies] = useState<IMovie[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -16,141 +19,124 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
   const handleSearchSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (filterMode === 'favorites') {
+      setHasSearched(true);
+    }
+
     if (searchQuery.trim() === '') {
-      setError("Enter a movie title to search.");
+      setError('Enter a movie title to search.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
-    setMovies([]);
+    setSearchResults([]);
 
     try {
-      const api_key = "api key" // will be in .env later
-
+      const api_key = import.meta.env.VITE_OMDB_API_KEY;
       const response = await fetch(`https://www.omdbapi.com/?apikey=${api_key}&s=${searchQuery}`);
-      const data = await response.json();
+      const data: TOmdbResponse = await response.json();
 
-      if (data.Response === "True") {
-        const fetchedMovies: IMovie[] = data.Search.map((movie: any) => ({
+      if (data.Response === 'True') {
+        const fetchedMovies: IMovie[] = data.Search.map((movie) => ({
           id: movie.imdbID,
           title: movie.Title,
           year: movie.Year,
           posterUrl: movie.Poster,
-          isFavorite: false,
+          isFavorite: favorites.has(movie.imdbID),
         }));
-        setMovies(fetchedMovies);
+        setSearchResults(fetchedMovies);
       } else {
         setError(data.Error);
-        setMovies([]);
+        setSearchResults([]);
       }
     } catch (e) {
-      setError("Failed to fetch movies");
+      if (e instanceof Error) {
+        setError(`Failed to fetch movies: ${e}`);
+      } else {
+        setError('Unknown error');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleToggleFavorite = (movieId: string) => {
-    setMovies(prevMovies => prevMovies.map(movie => {
-      if (movie.id === movieId) {
-        return {...movie, isFavorite: !movie.isFavorite };
+    setFavorites(prevFavorites => {
+      const newFavorites = new Map(prevFavorites);
+      const movieInFavorites = newFavorites.get(movieId);
+
+      if (movieInFavorites) {
+        newFavorites.delete(movieId);
+      } else {
+        const allMovies = [...searchResults, ...Array.from(prevFavorites.values())];
+        const movieToAdd = allMovies.find(m => m.id === movieId);
+        if (movieToAdd) {
+          newFavorites.set(movieId, { ...movieToAdd, isFavorite: true });
+        }
       }
-      return movie;
-    }));
+      return newFavorites;
+    });
+
+    setSearchResults(prevResults => prevResults.map(movie => {
+        if (movie.id === movieId) {
+          return { ...movie, isFavorite: !movie.isFavorite };
+        }
+        return movie;
+      })
+    );
   };
 
   const handleToggleViewMode = () => {
-    if (viewMode === 'grid') {
-      setViewMode('list');
-    } else {
-      setViewMode('grid')
-    }
+    setViewMode(prevMode => (prevMode === 'grid' ? 'list' : 'grid'));
   }
 
-  const visibleMovies = movies.filter(movie => {
-    if (filterMode === 'favorites') {
-      return movie.isFavorite;
-    }
-    return true;
-  });
+  const handleFilterChange = (mode: FilterMode) => {
+    setFilterMode(mode);
+    setSearchQuery('');
+    setError(null);
+    setHasSearched(false);
+  };
 
-  const containerClasses = viewMode === 'grid'
-    ? 'CardsContainer grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center pt-2'
-    : 'CardsContainer flex flex-col items-center gap-4 pt-2';
-
-  const renderContent = () => {
-    if (isLoading) {
-      return <div>Loading...</div>;
-    }
-    if (error) {
-      return <div className="text-red-500 font-bold mt-4">{error}</div>;
-    }
-    if (hasSearched && visibleMovies.length === 0) {
-      return <div>No films found.</div>
-    }
-    if (!hasSearched) {
-      return <div>Start by searching for a movie above.</div>
-    }
-
-    return visibleMovies.map(movie => (
-      <MovieCard
-        movie={movie}
-        key={movie.id}
-        onToggleFavorite={handleToggleFavorite}
-        viewMode={viewMode}
-      />
-    ));
-  }
+  const visibleMovies = filterMode === 'favorites'
+    ? Array.from(favorites.values()).filter(movie =>
+      movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+    ) : searchResults;
 
   return (
-    <div className="flex flex-col flex-nowrap items-center">
-      <div className="controls p-1.5 h-10 bg-gray-400/90 w-full sticky top-0 z-3">
+    <div className='flex flex-col flex-nowrap items-center'>
+      <div className='controls p-1.5 h-10 bg-gray-400/90 w-full sticky top-0 z-3'>
 
-        <div className="container max-w-4xl m-auto flex flex-row flex-wrap justify-around">
-          <button
-            className="mr-5 h-7 w-10 rounded-sm hover:bg-gray-400 transition-colors delay-[25ms] active:bg-gray-500"
-            onClick={() => setFilterMode('all')}
-            disabled={filterMode === 'all'}
-          >
-            All
-          </button>
-          <button
-            className="mr-5 h-7 w-22 rounded-sm hover:bg-gray-400 transition-colors delay-[25ms] active:bg-gray-500"
-            onClick={() => setFilterMode('favorites')}
-            disabled={filterMode === 'favorites'}
-          >
-            Favorites
-          </button>
-          <button
-            className="h-7 px-2 rounded-sm hover:bg-gray-400 transition-colors delay-[25ms] active:bg-gray-500"
-            onClick={handleToggleViewMode}
-          >
-            {viewMode === 'grid' ? 'Show as list' : 'Show as grid'}
-          </button>
+        <div className='container max-w-4xl m-auto flex flex-row flex-wrap justify-around'>
+         <Controls
+           filterMode={filterMode}
+           onFilterChange={handleFilterChange}
+           viewMode={viewMode}
+           onViewModeChange={handleToggleViewMode}
+         />
 
-          <form onSubmit={handleSearchSubmit}>
-            <input
-              className="h-7 w-45 rounded-sm hover:bg-gray-400 transition-colors delay-[25ms] focus:bg-gray-400"
-              type="text"
-              placeholder="Start typing..."
-              ref={searchInputRef}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
+         <SearchBar
+           searchQuery={searchQuery}
+           setSearchQuery={setSearchQuery}
+           onSubmit={handleSearchSubmit}
+         />
         </div>
       </div>
 
-      <div className="container max-w-4xl">
-        <div className={containerClasses}>
-          {renderContent()}
-        </div>
+      <div className='container max-w-4xl'>
+          <MovieList
+            movies={visibleMovies}
+            isLoading={isLoading}
+            error={error}
+            hasSearched={hasSearched}
+            filterMode={filterMode}
+            viewMode={viewMode}
+            onToggleFavorite={handleToggleFavorite}
+          />
       </div>
     </div>
   );

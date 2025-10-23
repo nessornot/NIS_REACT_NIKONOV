@@ -1,5 +1,5 @@
-import type { IMovie } from "../../data/movies.ts";
-import React from "react";
+import type { IMovie } from '../data/movies.ts';
+import React from 'react';
 
 interface MovieCardProps {
 	movie: IMovie;
@@ -16,16 +16,16 @@ export const MovieCard: React.FC<MovieCardProps> = ({movie, onToggleFavorite, vi
 	if (viewMode === 'grid') {
 		return (
 			<div className='MovieCard flex flex-col flex-nowrap items-center p-1.5 bg-gray-100 rounded-lg w-full max-w-xs shadow-sm'>
-				<div className="MoviecCard__img">
+				<div>
 					<img className='w-48 mt-1 rounded-md' src={movie.posterUrl} alt={movie.title}/>
 				</div>
-				<div className="MovieCard__title text-lg text-center font-semibold mt-2">
+				<div className='text-lg text-center font-semibold mt-2'>
 					{movie.title}
 				</div>
-				<div className="MovieCard__year text-sm mb-3 text-gray-600">
+				<div className='text-sm mb-3 text-gray-600'>
 					{movie.year}
 				</div>
-				<button onClick={handleFavoriteClick} className="mt-auto text-sm underline hover:text-blue-800">
+				<button onClick={handleFavoriteClick} className='mt-auto text-sm underline hover:text-blue-800'>
 					{movie.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 				</button>
 			</div>
@@ -35,17 +35,17 @@ export const MovieCard: React.FC<MovieCardProps> = ({movie, onToggleFavorite, vi
 	// list view
 	return (
 		<div className='MovieCard flex flex-row flex-nowrap items-center w-full p-2 bg-gray-100 rounded-lg shadow-sm gap-4'>
-			<div className="MoviecCard__img flex-shrink-0">
+			<div className='flex-shrink-0'>
 				<img className='w-36 h-36 object-cover rounded' src={movie.posterUrl} alt={movie.title}/>
 			</div>
-			<div className="flex flex-col self-stretch flex-grow">
-				<div className="MovieCard__title text-2xl font-bold text-left">
+			<div className='flex flex-col self-stretch flex-grow'>
+				<div className='text-2xl font-bold text-left'>
 					{movie.title}
 				</div>
-				<div className="MovieCard__year text-base mb-3 text-md text-gray-600 text-left">
+				<div className='text-base mb-3 text-md text-gray-600 text-left'>
 					{movie.year}
 				</div>
-				<button onClick={handleFavoriteClick} className="mt-auto text-sm underline text-blue-600 hover:text-blue-800 self-start">
+				<button onClick={handleFavoriteClick} className='mt-auto text-sm underline text-blue-600 hover:text-blue-800 self-start'>
 					{movie.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
 				</button>
 			</div>
