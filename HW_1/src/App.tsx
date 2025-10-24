@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {type IMovie, type TOmdbResponse} from './data/movies.ts';
 import {SearchBar} from './components/SearchBar.tsx';
 import {Controls} from './components/Controls.tsx';
@@ -12,8 +12,10 @@ const App: React.FC = () => {
   const [favorites, setFavorites] = useState<Map<string, IMovie>>(new Map());
 
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +24,15 @@ const App: React.FC = () => {
   const handleSearchSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const query = searchInputRef.current?.value || '';
+    setActiveSearch(query);
+
     if (filterMode === 'favorites') {
       setHasSearched(true);
+      return;
     }
 
-    if (searchQuery.trim() === '') {
+    if (query.trim() === '') {
       setError('Enter a movie title to search.');
       return;
     }
@@ -38,7 +44,7 @@ const App: React.FC = () => {
 
     try {
       const api_key = import.meta.env.VITE_OMDB_API_KEY;
-      const response = await fetch(`https://www.omdbapi.com/?apikey=${api_key}&s=${searchQuery}`);
+      const response = await fetch(`https://www.omdbapi.com/?apikey=${api_key}&s=${query}`);
       const data: TOmdbResponse = await response.json();
 
       if (data.Response === 'True') {
@@ -56,7 +62,7 @@ const App: React.FC = () => {
       }
     } catch (e) {
       if (e instanceof Error) {
-        setError(`Failed to fetch movies: ${e}`);
+        setError(`Failed to fetch movies: ${e.message}`);
       } else {
         setError('Unknown error');
       }
@@ -97,14 +103,17 @@ const App: React.FC = () => {
 
   const handleFilterChange = (mode: FilterMode) => {
     setFilterMode(mode);
-    setSearchQuery('');
+    setActiveSearch('');
     setError(null);
     setHasSearched(false);
+    if (searchInputRef.current) {
+      searchInputRef.current.value = '';
+    }
   };
 
   const visibleMovies = filterMode === 'favorites'
     ? Array.from(favorites.values()).filter(movie =>
-      movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+      movie.title.toLowerCase().includes(activeSearch.toLowerCase())
     ) : searchResults;
 
   return (
@@ -119,11 +128,10 @@ const App: React.FC = () => {
            onViewModeChange={handleToggleViewMode}
          />
 
-         <SearchBar
-           searchQuery={searchQuery}
-           setSearchQuery={setSearchQuery}
-           onSubmit={handleSearchSubmit}
-         />
+          <SearchBar
+            ref={searchInputRef}
+            onSubmit={handleSearchSubmit}
+          />
         </div>
       </div>
 
