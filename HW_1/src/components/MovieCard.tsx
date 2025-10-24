@@ -17,7 +17,9 @@ export const MovieCard: React.FC<MovieCardProps> = ({movie, onToggleFavorite, vi
 		return (
 			<div className='MovieCard flex flex-col flex-nowrap items-center p-1.5 bg-gray-100 rounded-lg w-full max-w-xs shadow-sm'>
 				<div>
-					<img className='w-48 mt-1 rounded-md' src={movie.posterUrl} alt={movie.title}/>
+					{movie.posterUrl !== 'N/A' ?
+						<img className='w-48 h-64 mt-1 rounded-md' src={movie.posterUrl} alt={movie.title}/>
+						: <div className='w-48 h-64 bg-gray-200 flex flex justify-center items-center'>no image</div>}
 				</div>
 				<div className='text-lg text-center font-semibold mt-2'>
 					{movie.title}
