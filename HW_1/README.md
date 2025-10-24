@@ -1,7 +1,15 @@
 # Запуск
 
+### 1. Окружение
+
+Создайте `.env.local` файл и поместите внутрь него:
+```
+VITE_OMDB_API_KEY=741a105
+```
+
+### 2. Установка зависимостей и запуск
+
 ```bash
-echo "VITE_OMDB_API_KEY=741a105" > .env.local
 npm install
 npm run dev
 ```
