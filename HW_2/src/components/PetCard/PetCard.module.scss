@@ -1,0 +1,28 @@
+
+.PetCard {
+  width: 200px;
+  background-color: #f00;
+  margin: 5px;
+  padding: 5px;
+
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.PetImg {
+  height: 100px;
+  width: 100px;
+
+  margin: 5px;
+}
+
+.BtnRow {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.Btn {
+  background-color: #0f0;
+}

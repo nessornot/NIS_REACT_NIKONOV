@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "name": "bob",
+    "species": "cat",
+    "mood": "ok",
+    "energy": 100,
+    "level": 1,
+    "avatar": "https://i.pinimg.com/474x/55/01/40/550140140f6c9efa2cce59e986bc67c5.jpg"
+  },
+  {
+    "id": 2,
+    "name": "bib",
+    "species": "dog",
+    "mood": "ok",
+    "energy": 100,
+    "level": 1,
+    "avatar": "https://cdn.prod.www.spiegel.de/images/2bf21c38-321d-487b-9b48-48f24a03b547_w256_r1_fpx45_fpy38.png"
+  },
+  {
+    "id": 3,
+    "name": "bab",
+    "species": "monke",
+    "mood": "ok",
+    "energy": 100,
+    "level": 1,
+    "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTC8dai9NV4u7SqlbGFJUK778JuZDjasbLJuA&s"
+  },
+  {
+    "id": 4,
+    "name": "bub",
+    "species": "frog",
+    "mood": "ok",
+    "energy": 100,
+    "level": 1,
+    "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtD50W55J4WsvtN4TwRdTU4SIBXzESJIFgHg&s"
+  }
+]
+
